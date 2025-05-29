@@ -8,9 +8,195 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### In Progress
-- Backend NestJS implementation with modular architecture
-- Database integration strategy (PostgreSQL planned)
-- Authentication module development
+- Database integration strategy (PostgreSQL connection planned)
+- Real SMS integration via Twilio
+- Frontend React PWA development
+- Tontine management module planning
+
+---
+
+## [0.1.3] - 2025-01-29 - Authentication System Complete & Tested
+
+### Added - Fully Functional Authentication
+- **Complete JWT + OTP SMS Authentication System**:
+  - Phone-based user registration with Gabon format validation (+241...)
+  - OTP generation and SMS simulation with security measures
+  - JWT token pair generation (access 1h + refresh 7d)
+  - User creation with integrated reputation system (75/100 - Silver level)
+  - Professional error handling and validation
+
+- **Working API Endpoints**:
+  - `POST /auth/send-otp` - Generate and send OTP code
+  - `POST /auth/verify-otp` - Verify OTP and authenticate user
+  - `GET /users/:id/stats` - Retrieve user statistics and profile
+  - All endpoints documented with Swagger/OpenAPI
+
+- **Security Features**:
+  - OTP rate limiting (5 attempts max, 30min cooldown)
+  - JWT payload with user context (ID, phone, name, trust level)
+  - Phone number format validation specific to Gabon market
+  - Development mode OTP visibility for testing
+  - Secure token generation with configurable expiration
+
+### Added - User Management & Reputation System
+- **User Entity with Trust Levels**:
+  - 5-tier reputation system: Risk → Bronze → Silver → Gold → Platinum
+  - Default user starts at Silver level (75/100 reputation score)
+  - Trust level visualization with colors and icons
+  - User profile with statistics and membership tracking
+
+- **In-Memory Database Simulation**:
+  - Temporary storage solution for development and testing
+  - Architecture ready for PostgreSQL integration
+  - User data persistence during application lifecycle
+  - Clean separation between business logic and data layer
+
+### Successfully Tested - Complete Authentication Flow
+- **End-to-End Testing via Swagger UI**:
+  - ✅ OTP Request: Phone +241062345678 → Code generation
+  - ✅ User Registration: Jean Nguema created successfully
+  - ✅ JWT Generation: Access and refresh tokens produced
+  - ✅ User Profile: Reputation system working (Silver level)
+  - ✅ API Documentation: All endpoints interactive and functional
+
+- **Real Authentication Response**:
+```json
+{
+  "user": {
+    "id": "m1jvlowv9",
+    "phone": "+241062345678", 
+    "name": "Jean Nguema",
+    "reputationScore": 75,
+    "trustLevel": "SILVER",
+    "trustLevelInfo": {
+      "name": "Argent",
+      "color": "#a0aec0", 
+      "icon": "🥈"
+    }
+  },
+  "tokens": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+    "expiresIn": 3600
+  }
+}
+```
+
+### Technical Implementation Details
+- **Module Architecture**:
+  - AuthModule with JWT configuration
+  - UsersModule with service layer
+  - Proper dependency injection and exports
+  - Clean separation of concerns
+
+- **Validation & DTOs**:
+  - Gabon phone number validation (+241 format)
+  - OTP format validation (6 digits only)
+  - User input sanitization and transformation
+  - Comprehensive error messaging in French
+
+- **Development Tools**:
+  - Hot reload development server
+  - Console logging for OTP codes (development mode)
+  - Swagger interactive documentation
+  - Professional API error responses
+
+### Current Status
+- ✅ **Authentication System**: Fully functional and tested
+- ✅ **User Management**: Profile creation and statistics
+- ✅ **API Documentation**: Interactive Swagger interface
+- ✅ **Security**: JWT tokens and OTP validation working
+- ✅ **Mobile Optimization**: Gabon phone format support
+- ⏳ **Database Integration**: Architecture ready for PostgreSQL
+- ⏳ **SMS Integration**: Ready for Twilio implementation
+- ⏳ **Frontend**: API ready for React PWA connection
+
+### Next Priority Steps
+1. **Database Integration**: Connect PostgreSQL for data persistence
+2. **Real SMS Service**: Integrate Twilio for actual OTP sending
+3. **Frontend Development**: Create React PWA interface
+4. **Tontine Module**: Build core business logic (groups, payments, drawings)
+5. **Mobile Money**: Integrate Gabon payment gateways
+
+---
+
+## [0.1.2] - 2025-01-29 - Authentication Module Foundation
+
+### Added - Authentication Architecture
+- **Complete File Structure**:
+  - User entity with reputation system integration
+  - Authentication DTOs with validation rules
+  - JWT payload interfaces and response types
+  - Modular organization (users/, auth/, dto/, interfaces/)
+
+- **User Management System**:
+  - `User` entity with trust level enumeration (RISK → BRONZE → SILVER → GOLD → PLATINUM)
+  - Integrated reputation scoring (default 75/100 - Silver level)
+  - OTP security features (attempts tracking, blocking mechanism)
+  - Phone number validation for Gabon (+241 format)
+  - User profile with trust level visualization
+
+- **Authentication Components**:
+  - `SendOtpDto` - Phone number validation for Gabon market
+  - `VerifyOtpDto` - OTP verification with user registration
+  - `JwtPayload` interface for token structure
+  - `AuthResponse` interface for consistent API responses
+  - JWT token generation (access + refresh tokens)
+
+- **Security Features Prepared**:
+  - OTP rate limiting (5 attempts max, 30min cooldown)
+  - Phone format validation specific to Gabon (+241...)
+  - JWT token expiration handling (1h access, 7d refresh)
+  - User blocking mechanism for abuse prevention
+  - Development mode OTP visibility (for testing)
+
+### Added - Validation & DTOs
+- **Phone Number Validation**:
+  - Gabon-specific format validation (+241...)
+  - International phone number format support
+  - Custom error messages in French
+  - Required field validation with proper error handling
+
+- **User Data Validation**:
+  - Name length validation (2-100 characters)
+  - Optional email format validation
+  - OTP format validation (6 digits only)
+  - Input sanitization and transformation
+
+### Technical Implementation Details
+- **Entity Design**:
+  - Base entity inheritance with UUID primary keys
+  - Soft delete capability prepared
+  - Timestamp tracking (created, updated, last login)
+  - Index optimization for phone and email lookups
+
+- **OTP Management**:
+  - Secure OTP generation (6-digit random)
+  - Expiration handling (10 minutes validity)
+  - Attempt counting and blocking logic
+  - SMS simulation ready for Twilio integration
+
+- **JWT Integration**:
+  - Payload structure with user context
+  - Token pair generation (access/refresh)
+  - Expiration time configuration
+  - User trust level included in tokens
+
+### Development Progress
+- ✅ **File Structure**: All authentication module files created
+- ✅ **Entity Design**: User entity with reputation system complete
+- ✅ **DTO Validation**: Input validation rules implemented
+- ✅ **Service Logic**: Authentication business logic designed
+- ⏳ **Controller Implementation**: REST endpoints pending
+- ⏳ **Database Integration**: TypeORM connection pending
+- ⏳ **Testing**: Swagger integration and testing pending
+
+### Next Immediate Steps
+1. **Populate Authentication Files**: Add code to created files
+2. **Configure Module Dependencies**: Wire up NestJS modules
+3. **Database Integration**: Enable TypeORM for User entity
+4. **API Testing**: Test endpoints with Swagger UI
+5. **SMS Integration**: Connect Twilio for actual OTP sending
 
 ---
 
@@ -102,8 +288,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 3. **Database Integration**: PostgreSQL connection and migrations
 4. **Reputation System**: Automated scoring algorithm
 5. **Testing**: Unit tests for core functionality
-
----
 
 ## [0.1.0] - 2025-01-28 - Foundation & Technical Setup
 
@@ -276,4 +460,4 @@ All changes must be documented in this changelog before release. Please follow t
 
 ---
 
-*Last updated: January 29, 2025* 
+*Last updated: January 28, 2025*
