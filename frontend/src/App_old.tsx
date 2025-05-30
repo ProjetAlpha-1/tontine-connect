@@ -1,153 +1,17 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { authService } from './services/authService'
 import Dashboard from './pages/Dashboard'
 import CreateTontine from './pages/CreateTontine'
 
-// Composant temporaire pour l'enrollment (sera développé plus tard)
-const TontineEnrollment: React.FC = () => {
-  const navigate = useNavigate()
-  
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Page d'enrollment
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Cette page sera développée dans la prochaine étape.
-        </p>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
-        >
-          Retour au dashboard
-        </button>
-      </div>
-    </div>
-  )
-}
+type CurrentPage = 'dashboard' | 'create-tontine'
 
-// Composant wrapper pour l'authentification
-const AuthenticatedApp: React.FC = () => {
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  // Récupérer les données utilisateur depuis le localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('auth-token')
-    if (token) {
-      // TODO: Récupérer les vraies données utilisateur
-      setUser({ phone: '+241 XX XX XX XX' })
-    }
-  }, [])
-
-  // Déconnexion
-  const handleLogout = () => {
-    localStorage.removeItem('auth-token')
-    navigate('/login')
-    window.location.reload() // Force la réinitialisation de l'app
-  }
-
-  // Navigation vers création de tontine
-  const handleCreateTontine = () => {
-    navigate('/tontines/create')
-  }
-
-  // Fonction appelée quand une tontine est créée avec succès
-  const handleTontineCreated = (newTontine: any) => {
-    console.log('Nouvelle tontine créée:', newTontine)
-    // TODO: Ajouter la tontine à la liste ou faire autre chose
-    // Pour l'instant, on redirige vers le dashboard
-    navigate('/dashboard')
-  }
-
-  // Fonction pour retour au dashboard
-  const handleBackToDashboard = () => {
-    navigate('/dashboard')
-  }
-
-  // Déterminer le titre de la page pour le breadcrumb
-  const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/tontines/create':
-        return 'Créer une tontine'
-      case '/dashboard':
-        return 'Dashboard'
-      default:
-        if (location.pathname.includes('/enrollment')) {
-          return 'Invitation des membres'
-        }
-        return ''
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header avec navigation */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
-              >
-                🏛️ Tontine Connect
-              </button>
-              {location.pathname !== '/dashboard' && (
-                <span className="ml-4 text-gray-500">
-                  / {getPageTitle()}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                📱 {user?.phone || 'Utilisateur connecté'}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200"
-              >
-                Déconnexion
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Routes principales */}
-      <Routes>
-        <Route 
-          path="/dashboard" 
-          element={<Dashboard onCreateTontine={handleCreateTontine} />} 
-        />
-        <Route 
-          path="/tontines/create" 
-          element={
-            <CreateTontine 
-              onBack={handleBackToDashboard}
-              onSuccess={handleTontineCreated}
-            />
-          } 
-        />
-        <Route 
-          path="/tontines/:id/enrollment" 
-          element={<TontineEnrollment />} 
-        />
-        {/* Redirection par défaut */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        {/* Route 404 */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </div>
-  )
-}
-
-// Composant d'authentification (votre code existant)
-const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('dashboard')
+  
   // États pour l'authentification
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [phone, setPhone] = useState('')
@@ -155,6 +19,25 @@ const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Vérifier si l'utilisateur est déjà connecté au chargement
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth-token')
+      if (token) {
+        try {
+          const userData = await authService.validateToken(token)
+          setUser(userData)
+          setIsAuthenticated(true)
+        } catch (error) {
+          localStorage.removeItem('auth-token')
+        }
+      }
+      setIsLoading(false)
+    }
+    
+    checkAuth()
+  }, [])
 
   // Envoyer OTP
   const handleSendOTP = async (e: React.FormEvent) => {
@@ -192,12 +75,14 @@ const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess })
 
     try {
       const result = await authService.verifyOTP(phone, otp)
-
+      
       // Sauvegarder le token
       localStorage.setItem('auth-token', result.token)
-
+      
+      // Mettre à jour l'état
+      setUser(result.user)
+      setIsAuthenticated(true)
       setSuccess('Connexion réussie!')
-      onLoginSuccess()
     } catch (error: any) {
       setError(error.message)
     } finally {
@@ -205,6 +90,98 @@ const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess })
     }
   }
 
+  // Déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('auth-token')
+    setIsAuthenticated(false)
+    setUser(null)
+    setStep('phone')
+    setPhone('')
+    setOtp('')
+    setError('')
+    setSuccess('')
+    setCurrentPage('dashboard')
+  }
+
+  // Navigation vers création de tontine
+  const handleCreateTontine = () => {
+    setCurrentPage('create-tontine')
+  }
+
+  // Retour au dashboard
+  const handleBackToDashboard = () => {
+    setCurrentPage('dashboard')
+  }
+
+  // Succès de création de tontine
+  const handleTontineCreated = (newTontine: any) => {
+    console.log('Nouvelle tontine créée:', newTontine)
+    // TODO: Ajouter la tontine à la liste
+    setCurrentPage('dashboard')
+    // Afficher un message de succès
+  }
+
+  // Loading initial
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // Application après connexion
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header avec navigation */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={handleBackToDashboard}
+                  className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
+                >
+                  🏦 Tontine Connect
+                </button>
+                {currentPage !== 'dashboard' && (
+                  <span className="ml-4 text-gray-500">
+                    / {currentPage === 'create-tontine' ? 'Créer une tontine' : ''}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  📱 {user?.phone || 'Utilisateur connecté'}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Contenu principal selon la page */}
+        {currentPage === 'dashboard' && (
+          <Dashboard onCreateTontine={handleCreateTontine} />
+        )}
+        
+        {currentPage === 'create-tontine' && (
+          <CreateTontine 
+            onBack={handleBackToDashboard}
+            onSuccess={handleTontineCreated}
+          />
+        )}
+      </div>
+    )
+  }
+
+  // Interface de connexion
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -217,8 +194,8 @@ const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess })
             Tontine Connect
           </h1>
           <p className="text-gray-600">
-            {step === 'phone'
-              ? 'Connectez-vous avec votre numéro de téléphone'
+            {step === 'phone' 
+              ? 'Connectez-vous avec votre numéro de téléphone' 
               : 'Saisissez le code reçu par SMS'
             }
           </p>
@@ -332,57 +309,4 @@ const LoginForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess })
   )
 }
 
-// Composant principal App avec gestion d'authentification
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Vérifier si l'utilisateur est déjà connecté au chargement
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('auth-token')
-      if (token) {
-        try {
-          const userData = await authService.validateToken(token)
-          setIsAuthenticated(true)
-        } catch (error) {
-          localStorage.removeItem('auth-token')
-        }
-      }
-      setIsLoading(false)
-    }
-
-    checkAuth()
-  }, [])
-
-  // Gérer la connexion réussie
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true)
-  }
-
-  // Loading initial
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  return (
-    <Router>
-      {isAuthenticated ? (
-        <AuthenticatedApp />
-      ) : (
-        <Routes>
-          <Route 
-            path="*" 
-            element={<LoginForm onLoginSuccess={handleLoginSuccess} />} 
-          />
-        </Routes>
-      )}
-    </Router>
-  )
-}
-
-export default App
+export default App 

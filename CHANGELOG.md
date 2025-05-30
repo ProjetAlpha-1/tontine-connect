@@ -327,3 +327,99 @@ MIT - voir LICENSE pour plus de détails.
 ---
 
 *Tontine Connect - Révolutionner l'épargne collective en Afrique* 🌍
+
+# Changelog
+
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2025-05-30
+
+### ✨ Ajouté
+- **Page de création de tontine complète** avec formulaire multi-sections
+- **Validation des données** frontend avec Yup et React Hook Form
+- **Aperçu en temps réel** des informations saisies
+- **Module backend Tontines** avec NestJS + TypeScript
+- **API endpoints** pour la gestion des tontines (`/api/v1/tontines`)
+- **Types TypeScript** partagés pour les tontines
+- **Navigation React Router** entre les pages
+- **Architecture workflow** en 4 étapes (Création → Enrollment → Configuration → Active)
+
+### 🔧 Backend
+- **TontinesController** avec endpoints CRUD complets
+- **TontinesService** avec logique métier et validation
+- **Modèles de données** : Tontine, TontineRules, TontineStatus
+- **DTOs de validation** avec class-validator
+- **Stockage en mémoire** temporaire (sans DB)
+- **Gestion d'erreurs** et réponses formatées
+
+### 🎨 Frontend  
+- **Formulaire de création** avec 4 sections organisées :
+  - Informations générales (nom, description, objectif)
+  - Configuration financière (montant, fréquence, pénalités)
+  - Participants et calendrier (min/max participants, dates)
+  - Règles et configuration (ordre, retrait anticipé)
+- **Interface responsive** avec Tailwind CSS
+- **Aperçu dynamique** avec calculs automatiques
+- **Validation temps réel** avec messages d'erreur
+- **Navigation fluide** entre dashboard et création
+
+### 🔗 Intégration
+- **Communication API** frontend ↔ backend fonctionnelle
+- **Gestion d'erreurs** avec messages utilisateur
+- **Redirection automatique** vers la page d'enrollment
+- **Logs de debug** complets côté frontend et backend
+
+### 📋 Workflow implémenté
+1. **Étape 1 : Création** ✅ - Définition des paramètres de base
+2. **Étape 2 : Enrollment** 🚧 - Invitation et gestion des membres (prochaine étape)
+3. **Étape 3 : Configuration** 📋 - Détermination de l'ordre des paiements
+4. **Étape 4 : Gestion active** 📋 - Cycles de paiement et suivi
+
+### 🛠️ Améliorations techniques
+- **Architecture modulaire** avec séparation claire des responsabilités
+- **Types TypeScript** robustes pour la sécurité des données
+- **Validation côté client et serveur** pour l'intégrité des données
+- **Gestion d'état** avec React Hook Form
+- **Routing** avec React Router v7
+- **Styling** moderne avec Tailwind CSS et Lucide Icons
+
+### 🐛 Corrections
+- **Résolution des problèmes de soumission** de formulaire
+- **Correction des URLs d'API** avec préfixe `/api/v1/`
+- **Fixe de la structure JSX** pour les boutons d'action
+- **Gestion du cache navigateur** pour les mises à jour de code
+
+### 🔮 Prochaines étapes
+- [ ] Page d'enrollment avec système d'invitations
+- [ ] Configuration de l'ordre des paiements
+- [ ] Intégration base de données PostgreSQL
+- [ ] Authentification connectée aux tontines
+- [ ] Dashboard avec liste des tontines
+- [ ] Tests unitaires et d'intégration
+
+## [0.1.0] - 2025-05-XX
+
+### ✨ Ajouté
+- **Authentification par téléphone** + OTP SMS
+- **Gestion complète des tontines** (structure de base)
+- **Système de réputation automatique** (5 niveaux)
+- **Paiements Mobile Money** (Moov, Airtel)
+- **Chat de groupe temps réel**
+- **PWA installable** sur mobile
+- **Architecture de base** NestJS + React + TypeScript
+
+### 🌍 Marché cible
+- **Gabon** (priorité) avec support Moov Money et Airtel Money
+
+---
+
+## Types de changements
+- `✨ Ajouté` pour les nouvelles fonctionnalités
+- `🔧 Modifié` pour les changements dans les fonctionnalités existantes  
+- `🐛 Corrigé` pour les corrections de bugs
+- `🗑️ Supprimé` pour les fonctionnalités supprimées
+- `⚠️ Déprécié` pour les fonctionnalités bientôt supprimées
+- `🔒 Sécurité` pour les corrections de vulnérabilités

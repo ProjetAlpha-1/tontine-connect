@@ -37,3 +37,20 @@ tontine-connect/
 🇬🇦 Gabon (priorité) - Moov Money, Airtel Money
 📜 Licence
 MIT - voir LICENSE pour plus de détails.
+
+## 🆕 Dernières mises à jour (v0.2.0)
+
+### ✅ Nouvelles fonctionnalités
+- **Page de création de tontine complète** avec validation avancée
+- **API backend opérationnelle** pour la gestion des tontines
+- **Workflow en 4 étapes** : Création → Enrollment → Configuration → Active
+- **Interface utilisateur moderne** avec aperçu en temps réel
+
+### 🚀 Fonctionnalités disponibles
+- ✅ Création de tontines avec paramètres complets
+- ✅ Navigation React Router entre les pages
+- ✅ Validation des données frontend/backend
+- ✅ API REST fonctionnelle
+- 🚧 Enrollment des membres (en développement)
+
+Voir le [CHANGELOG.md](./CHANGELOG.md) pour tous les détails.
