@@ -36,7 +36,11 @@ interface DashboardStats {
   reputation: number
 }
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onCreateTontine?: () => void
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onCreateTontine }) => {
   const [tontines, setTontines] = useState<Tontine[]>([])
   const [stats, setStats] = useState<DashboardStats>({
     totalTontines: 0,
@@ -176,7 +180,10 @@ const Dashboard: React.FC = () => {
                 <Users className="w-4 h-4 mr-2" />
                 Rejoindre une tontine
               </button>
-              <button className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200">
+              <button 
+                onClick={onCreateTontine}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200"
+              >
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Créer une tontine
               </button>

@@ -2,11 +2,15 @@
 import React, { useState, useEffect } from 'react'
 import { authService } from './services/authService'
 import Dashboard from './pages/Dashboard'
+import CreateTontine from './pages/CreateTontine'
+
+type CurrentPage = 'dashboard' | 'create-tontine'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('dashboard')
   
   // États pour l'authentification
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
@@ -96,6 +100,25 @@ function App() {
     setOtp('')
     setError('')
     setSuccess('')
+    setCurrentPage('dashboard')
+  }
+
+  // Navigation vers création de tontine
+  const handleCreateTontine = () => {
+    setCurrentPage('create-tontine')
+  }
+
+  // Retour au dashboard
+  const handleBackToDashboard = () => {
+    setCurrentPage('dashboard')
+  }
+
+  // Succès de création de tontine
+  const handleTontineCreated = (newTontine: any) => {
+    console.log('Nouvelle tontine créée:', newTontine)
+    // TODO: Ajouter la tontine à la liste
+    setCurrentPage('dashboard')
+    // Afficher un message de succès
   }
 
   // Loading initial
@@ -107,18 +130,26 @@ function App() {
     )
   }
 
-  // Dashboard après connexion
+  // Application après connexion
   if (isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header avec déconnexion */}
+        {/* Header avec navigation */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <button
+                  onClick={handleBackToDashboard}
+                  className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
+                >
                   🏦 Tontine Connect
-                </h1>
+                </button>
+                {currentPage !== 'dashboard' && (
+                  <span className="ml-4 text-gray-500">
+                    / {currentPage === 'create-tontine' ? 'Créer une tontine' : ''}
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">
@@ -135,8 +166,17 @@ function App() {
           </div>
         </header>
 
-        {/* Dashboard principal */}
-        <Dashboard />
+        {/* Contenu principal selon la page */}
+        {currentPage === 'dashboard' && (
+          <Dashboard onCreateTontine={handleCreateTontine} />
+        )}
+        
+        {currentPage === 'create-tontine' && (
+          <CreateTontine 
+            onBack={handleBackToDashboard}
+            onSuccess={handleTontineCreated}
+          />
+        )}
       </div>
     )
   }
