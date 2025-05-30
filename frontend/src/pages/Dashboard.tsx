@@ -1,146 +1,392 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import toast from 'react-hot-toast';
+// src/pages/Dashboard.tsx
+import React, { useState, useEffect } from 'react'
+import { 
+  PlusCircle, 
+  Users, 
+  Wallet, 
+  TrendingUp, 
+  Calendar,
+  ArrowRight,
+  Star,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react'
 
-export const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+interface Tontine {
+  id: string
+  name: string
+  description: string
+  totalAmount: number
+  currentAmount: number
+  members: number
+  maxMembers: number
+  nextPaymentDate: string
+  frequency: 'weekly' | 'monthly'
+  status: 'active' | 'pending' | 'completed'
+  isOwner: boolean
+  reputation: number
+}
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Déconnexion réussie');
-    navigate('/');
-  };
+interface DashboardStats {
+  totalTontines: number
+  activeTontines: number
+  totalContributed: number
+  nextPaymentAmount: number
+  nextPaymentDate: string
+  reputation: number
+}
 
-  if (!user) {
-    navigate('/auth');
-    return null;
+const Dashboard: React.FC = () => {
+  const [tontines, setTontines] = useState<Tontine[]>([])
+  const [stats, setStats] = useState<DashboardStats>({
+    totalTontines: 0,
+    activeTontines: 0,
+    totalContributed: 0,
+    nextPaymentAmount: 0,
+    nextPaymentDate: '',
+    reputation: 0
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'completed'>('active')
+
+  // Données de démonstration (en attendant l'API)
+  useEffect(() => {
+    // Simulation d'un appel API
+    setTimeout(() => {
+      const mockTontines: Tontine[] = [
+        {
+          id: '1',
+          name: 'Tontine des Collègues',
+          description: 'Épargne mensuelle entre collègues du bureau',
+          totalAmount: 500000,
+          currentAmount: 350000,
+          members: 7,
+          maxMembers: 10,
+          nextPaymentDate: '2025-06-05',
+          frequency: 'monthly',
+          status: 'active',
+          isOwner: true,
+          reputation: 4.8
+        },
+        {
+          id: '2',
+          name: 'Groupe Famille Nguema',
+          description: 'Tontine familiale pour les événements',
+          totalAmount: 200000,
+          currentAmount: 150000,
+          members: 5,
+          maxMembers: 8,
+          nextPaymentDate: '2025-06-02',
+          frequency: 'weekly',
+          status: 'active',
+          isOwner: false,
+          reputation: 4.9
+        },
+        {
+          id: '3',
+          name: 'Investissement Immobilier',
+          description: 'Épargne pour achat de terrain collectif',
+          totalAmount: 2000000,
+          currentAmount: 800000,
+          members: 12,
+          maxMembers: 15,
+          nextPaymentDate: '2025-06-10',
+          frequency: 'monthly',
+          status: 'pending',
+          isOwner: false,
+          reputation: 4.6
+        }
+      ]
+
+      const mockStats: DashboardStats = {
+        totalTontines: 3,
+        activeTontines: 2,
+        totalContributed: 450000,
+        nextPaymentAmount: 50000,
+        nextPaymentDate: '2025-06-02',
+        reputation: 4.8
+      }
+
+      setTontines(mockTontines)
+      setStats(mockStats)
+      setIsLoading(false)
+    }, 1000)
+  }, [])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XAF',
+      minimumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800'
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'completed': return 'bg-blue-100 text-blue-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active': return <CheckCircle className="w-4 h-4" />
+      case 'pending': return <AlertCircle className="w-4 h-4" />
+      case 'completed': return <Star className="w-4 h-4" />
+      default: return null
+    }
+  }
+
+  const filteredTontines = tontines.filter(tontine => tontine.status === activeTab)
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (
-    <div style={{ maxWidth: '448px', margin: '0 auto', minHeight: '100vh', background: 'white' }}>
-      {/* Header */}
-      <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', background: '#fed7aa', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <User size={20} style={{ color: '#ea580c' }} />
-          </div>
-          <div>
-            <h1 style={{ margin: 0, fontWeight: 'bold' }}>Bonjour {user.name.split(' ')[0]} !</h1>
-            <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>{user.phone}</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header avec actions */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                🏦 Mes Tontines
+              </h1>
+              <p className="mt-1 text-sm text-gray-600">
+                Gérez vos épargnes collectives en toute sécurité
+              </p>
+            </div>
+            <div className="mt-4 sm:mt-0 flex space-x-3">
+              <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                <Users className="w-4 h-4 mr-2" />
+                Rejoindre une tontine
+              </button>
+              <button className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200">
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Créer une tontine
+              </button>
+            </div>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          style={{ padding: '8px', background: 'none', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-        >
-          <LogOut size={20} style={{ color: '#6b7280' }} />
-        </button>
       </div>
 
-      {/* Contenu */}
-      <div style={{ padding: '24px' }}>
-        {/* Profil */}
-        <div style={{ background: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', marginBottom: '24px', border: '1px solid #f3f4f6' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Mon Profil de Confiance</h2>
-          
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#ea580c', marginBottom: '8px' }}>
-              {user.reputationScore}/100
-            </div>
-            <div style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              background: '#f3f4f6', 
-              color: '#374151', 
-              padding: '4px 12px', 
-              borderRadius: '20px', 
-              fontSize: '14px', 
-              fontWeight: '600' 
-            }}>
-              {user.trustLevelInfo.icon} {user.trustLevelInfo.name}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Statistiques rapides */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Wallet className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Total contribué
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {formatCurrency(stats.totalContributed)}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div style={{ background: '#f3f4f6', borderRadius: '12px', height: '12px', marginBottom: '16px' }}>
-            <div
-              style={{ 
-                background: 'linear-gradient(to right, #ea580c, #c2410c)', 
-                height: '12px', 
-                borderRadius: '12px',
-                width: `${user.reputationScore}%`,
-                transition: 'width 0.5s ease'
-              }}
-            />
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Users className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Tontines actives
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {stats.activeTontines} / {stats.totalTontines}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <p style={{ textAlign: 'center', fontSize: '14px', color: '#6b7280', margin: 0 }}>
-            {user.reputationScore >= 90 ? "Excellent ! Vous êtes dans le top 5% des membres" :
-             user.reputationScore >= 75 ? "Très bien ! Vous êtes un membre fiable" :
-             "Continuez à améliorer votre réputation"}
-          </p>
-        </div>
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Calendar className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Prochain paiement
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {formatCurrency(stats.nextPaymentAmount)}
+                    </dd>
+                    <dd className="text-xs text-gray-500">
+                      {formatDate(stats.nextPaymentDate)}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        {/* Tontines */}
-        <div style={{ background: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', marginBottom: '24px', border: '1px solid #f3f4f6' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Mes Tontines</h2>
-          <div style={{ textAlign: 'center', padding: '32px 0' }}>
-            <p style={{ color: '#6b7280', marginBottom: '16px' }}>Aucune tontine active</p>
-            <p style={{ fontSize: '14px', color: '#9ca3af', margin: 0 }}>
-              Créez votre première tontine ou rejoignez un groupe existant
-            </p>
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <TrendingUp className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Score de réputation
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {stats.reputation}/5 ⭐
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Boutons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button 
-            onClick={() => toast.info('Fonctionnalité en développement')}
-            style={{
-              background: 'linear-gradient(to right, #ea580c, #c2410c)',
-              color: 'white',
-              fontWeight: '600',
-              padding: '16px',
-              borderRadius: '16px',
-              border: 'none',
-              cursor: 'pointer',
-              width: '100%'
-            }}
-          >
-            ➕ Créer une nouvelle tontine
-          </button>
+        {/* Onglets de filtrage */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              {(['active', 'pending', 'completed'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } transition-colors duration-200`}
+                >
+                  {tab === 'active' && 'Actives'}
+                  {tab === 'pending' && 'En attente'}
+                  {tab === 'completed' && 'Terminées'}
+                  <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
+                    {tontines.filter(t => t.status === tab).length}
+                  </span>
+                </button>
+              ))}
+            </nav>
+          </div>
 
-          <button 
-            onClick={() => toast.info('Fonctionnalité en développement')}
-            style={{
-              background: 'linear-gradient(to right, #475569, #334155)',
-              color: 'white',
-              fontWeight: '600',
-              padding: '16px',
-              borderRadius: '16px',
-              border: 'none',
-              cursor: 'pointer',
-              width: '100%'
-            }}
-          >
-            👥 Rejoindre un groupe
-          </button>
-        </div>
-
-        {/* Info debug */}
-        <div style={{ marginTop: '32px', padding: '16px', background: '#dbeafe', borderRadius: '16px' }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#1e40af', fontWeight: '600' }}>🚀 Version de développement</h3>
-          <div style={{ fontSize: '14px', color: '#1e40af' }}>
-            <p style={{ margin: '4px 0' }}>ID: {user.id}</p>
-            <p style={{ margin: '4px 0' }}>Vérifié: {user.isVerified ? '✅ Oui' : '❌ Non'}</p>
-            <p style={{ margin: '4px 0' }}>Niveau: {user.trustLevel}</p>
-            <p style={{ margin: '4px 0' }}>Score: {user.reputationScore}/100</p>
+          {/* Liste des tontines */}
+          <div className="divide-y divide-gray-200">
+            {filteredTontines.length === 0 ? (
+              <div className="p-8 text-center">
+                <Users className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-sm font-medium text-gray-900">
+                  Aucune tontine {activeTab === 'active' ? 'active' : activeTab === 'pending' ? 'en attente' : 'terminée'}
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {activeTab === 'active' 
+                    ? 'Créez votre première tontine ou rejoignez un groupe existant.'
+                    : 'Aucune tontine dans cette catégorie pour le moment.'
+                  }
+                </p>
+              </div>
+            ) : (
+              filteredTontines.map((tontine) => (
+                <div key={tontine.id} className="p-6 hover:bg-gray-50 transition-colors duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {tontine.name}
+                        </h3>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(tontine.status)}`}>
+                          {getStatusIcon(tontine.status)}
+                          <span className="ml-1">
+                            {tontine.status === 'active' && 'Active'}
+                            {tontine.status === 'pending' && 'En attente'}
+                            {tontine.status === 'completed' && 'Terminée'}
+                          </span>
+                        </span>
+                        {tontine.isOwner && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            👑 Organisateur
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {tontine.description}
+                      </p>
+                      <div className="mt-3 flex items-center space-x-6 text-sm text-gray-500">
+                        <span className="flex items-center">
+                          <Users className="w-4 h-4 mr-1" />
+                          {tontine.members}/{tontine.maxMembers} membres
+                        </span>
+                        <span className="flex items-center">
+                          <Wallet className="w-4 h-4 mr-1" />
+                          {formatCurrency(tontine.currentAmount)} / {formatCurrency(tontine.totalAmount)}
+                        </span>
+                        <span className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          Prochain: {formatDate(tontine.nextPaymentDate)}
+                        </span>
+                        <span className="flex items-center">
+                          <Star className="w-4 h-4 mr-1" />
+                          {tontine.reputation}/5
+                        </span>
+                      </div>
+                      
+                      {/* Barre de progression */}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>Progression</span>
+                          <span>{Math.round((tontine.currentAmount / tontine.totalAmount) * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${(tontine.currentAmount / tontine.totalAmount) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="ml-6 flex-shrink-0">
+                      <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                        Voir détails
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
+
+export default Dashboard

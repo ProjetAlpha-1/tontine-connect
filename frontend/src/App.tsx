@@ -1,5 +1,7 @@
+// src/App.tsx
 import React, { useState, useEffect } from 'react'
 import { authService } from './services/authService'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -105,11 +107,11 @@ function App() {
     )
   }
 
-  // Interface après connexion
+  // Dashboard après connexion
   if (isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
+        {/* Header avec déconnexion */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
@@ -133,53 +135,8 @@ function App() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-              <h2 className="text-3xl font-bold text-green-600 mb-6">
-                🎉 Connexion réussie !
-              </h2>
-              
-              <div className="text-left space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  ✅ Système d'authentification fonctionnel :
-                </h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Backend NestJS + JWT + OTP SMS
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Frontend React + TypeScript
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Authentification par téléphone + SMS
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Gestion des sessions et tokens
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">
-                  🚀 Prochaines fonctionnalités à développer :
-                </h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Dashboard des tontines</li>
-                  <li>• Création et gestion des groupes</li>
-                  <li>• Intégration Mobile Money (Moov/Airtel)</li>
-                  <li>• Chat de groupe temps réel</li>
-                  <li>• Système de réputation avancé</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </main>
+        {/* Dashboard principal */}
+        <Dashboard />
       </div>
     )
   }

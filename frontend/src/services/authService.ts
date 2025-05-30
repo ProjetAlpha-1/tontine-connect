@@ -10,12 +10,14 @@ export interface SendOTPResponse {
 }
 
 export interface VerifyOTPResponse {
-  success: boolean
-  token: string
   user: {
     id: string
     phone: string
     name?: string
+  }
+  tokens: {
+    access_token: string
+    refresh_token?: string
   }
 }
 
@@ -39,7 +41,7 @@ class AuthService {
   async sendOTP(phone: string): Promise<SendOTPResponse> {
     try {
       const formattedPhone = this.formatPhone(phone)
-      const url = `${API_BASE_URL}/auth/send-otp`  // ✅ = /api/auth/send-otp
+      const url = `${API_BASE_URL}/auth/send-otp`
       
       console.log('📤 Envoi OTP vers:', formattedPhone)
       console.log('🌐 URL utilisée:', url)
@@ -76,10 +78,10 @@ class AuthService {
   }
 
   // Vérifier OTP et se connecter
-  async verifyOTP(phone: string, otp: string): Promise<VerifyOTPResponse> {
+  async verifyOTP(phone: string, otp: string): Promise<{ token: string, user: any }> {
     try {
       const formattedPhone = this.formatPhone(phone)
-      const url = `${API_BASE_URL}/auth/verify-otp`  // ✅ = /api/auth/verify-otp
+      const url = `${API_BASE_URL}/auth/verify-otp`
       
       console.log('🔐 Vérification OTP pour:', formattedPhone)
       console.log('🌐 URL utilisée:', url)
@@ -90,7 +92,12 @@ class AuthService {
       })
       
       console.log('✅ Réponse backend:', response.data)
-      return response.data
+      
+      // ✅ Adapter la réponse de votre backend au format attendu par le frontend
+      return {
+        token: response.data.tokens.access_token,
+        user: response.data.user
+      }
     } catch (error: any) {
       console.error('❌ Erreur vérification OTP:', error)
       
@@ -110,7 +117,7 @@ class AuthService {
     }
   }
 
-  // Valider le token JWT
+  // ✅ Utiliser la vraie route /auth/profile maintenant qu'elle existe
   async validateToken(token: string): Promise<any> {
     try {
       const response = await axios.get(`${API_BASE_URL}/auth/profile`, {
@@ -119,10 +126,16 @@ class AuthService {
         }
       })
       
+      console.log('✅ Profil utilisateur récupéré:', response.data)
       return response.data
-    } catch (error) {
-      console.error('Token invalide:', error)
-      throw new Error('Session expirée')
+    } catch (error: any) {
+      console.error('❌ Token invalide:', error)
+      
+      if (error.response?.status === 401) {
+        throw new Error('Session expirée')
+      }
+      
+      throw new Error('Erreur de validation du token')
     }
   }
 }
