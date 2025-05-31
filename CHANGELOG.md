@@ -423,3 +423,111 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `🗑️ Supprimé` pour les fonctionnalités supprimées
 - `⚠️ Déprécié` pour les fonctionnalités bientôt supprimées
 - `🔒 Sécurité` pour les corrections de vulnérabilités
+
+# Changelog
+
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
+et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.3.0] - 2025-05-31
+
+### 🎉 Ajouté
+- **Système d'enrollment complet** pour l'invitation et la gestion des membres
+- **Module Backend Enrollment** avec API REST complète
+- **Page frontend d'enrollment** avec interface moderne et responsive
+- **Service d'invitations** avec support SMS, lien partageable et QR code (préparé)
+- **Système d'approbation** des demandes de membres par le créateur
+- **Gestion des statuts** des membres (pending, approved, rejected, joined)
+- **Interface de progression** avec indicateurs visuels et conditions de validation
+- **API endpoints** pour la gestion complète du workflow d'enrollment :
+  - `GET /api/v1/tontines/:id/enrollment` - Données de la page d'enrollment
+  - `POST /api/v1/tontines/:id/enrollment/invitations` - Créer une invitation
+  - `POST /api/v1/tontines/:id/enrollment/invite-batch` - Invitations par lot (SMS)
+  - `PUT /api/v1/tontines/:id/enrollment/members/process` - Approuver/rejeter des membres
+  - `GET /api/v1/tontines/:id/enrollment/stats` - Statistiques d'enrollment
+  - `POST /api/v1/tontines/:id/enrollment/respond` - Répondre à une invitation
+
+### 🔧 Amélioré
+- **Architecture modulaire** du backend avec séparation claire des responsabilités
+- **Types TypeScript** partagés entre frontend et backend pour une meilleure cohérence
+- **Gestion d'erreurs** améliorée avec retours utilisateur appropriés
+- **Configuration des variables d'environnement** avec support Vite (VITE_API_URL)
+- **Documentation API** automatique avec Swagger pour tous les nouveaux endpoints
+
+### 🐛 Corrigé
+- **Duplication des préfixes API** (`/api/v1/api/v1/`) dans les controllers
+- **Erreurs TypeScript** avec les imports de types et `verbatimModuleSyntax`
+- **Configuration Vite** pour les variables d'environnement (`import.meta.env` vs `process.env`)
+- **Conflits de noms** entre composants temporaires et composants finaux
+
+### 🏗️ Technique
+- **Stockage en mémoire** pour le développement (prêt pour migration DB)
+- **Tokens JWT sécurisés** pour les invitations avec expiration
+- **Support multi-méthodes** d'invitation (SMS simulé, lien direct, QR code préparé)
+- **Architecture prête** pour intégration avec services SMS externes (Twilio, etc.)
+
+### 📋 État du workflow (4 étapes)
+- ✅ **Étape 1 : Création** - Complète et opérationnelle
+- ✅ **Étape 2 : Enrollment** - **NOUVELLE - Complète et opérationnelle**
+- 🚧 **Étape 3 : Configuration** - En attente (prochaine priorité)
+- 📋 **Étape 4 : Gestion active** - En attente
+
+### 🎯 Fonctionnalités Enrollment
+- **Interface d'invitation** avec 3 méthodes (SMS, Lien, QR Code)
+- **Gestion des membres** avec statuts visuels et actions d'approbation
+- **Barre de progression** dynamique basée sur min/max participants
+- **Validation automatique** des conditions pour passer à l'étape suivante
+- **Actualisation en temps réel** des données avec boutons de refresh
+- **Messages de feedback** utilisateur pour toutes les actions
+- **Responsive design** optimisé mobile et desktop
+
+---
+
+## [0.2.0] - 2025-05-30
+
+### 🎉 Ajouté
+- **Page de création de tontines** complète avec formulaire multi-sections
+- **Validation avancée** avec React Hook Form + Yup
+- **Interface responsive** avec Tailwind CSS et design moderne
+- **Aperçu en temps réel** des données saisies
+- **Navigation React Router** fonctionnelle entre les pages
+- **Intégration frontend ↔ backend** pour la création de tontines
+
+### 🔧 Amélioré
+- **Architecture modulaire** du backend avec types TypeScript
+- **API REST** pour les tontines avec endpoints complets
+- **Gestion d'erreurs** côté frontend avec retours utilisateur
+
+### 🏗️ Technique
+- **Stockage en mémoire** pour le développement rapide
+- **Types partagés** entre frontend et backend
+- **Configuration Vite** pour le développement moderne
+
+---
+
+## [0.1.0] - 2025-05-29
+
+### 🎉 Ajouté
+- **Architecture de base** avec Backend NestJS + Frontend React
+- **Authentification par téléphone** + OTP SMS
+- **Module utilisateurs** avec gestion des profils
+- **Configuration Docker** pour le déploiement
+- **Documentation de base** et structure du projet
+
+### 🏗️ Technique
+- **NestJS** avec TypeScript pour l'API
+- **React** avec TypeScript pour l'interface
+- **Authentification JWT** sécurisée
+- **Base de code** prête pour l'extension
+
+---
+
+## Légende
+- 🎉 **Ajouté** : Nouvelles fonctionnalités
+- 🔧 **Amélioré** : Améliorations des fonctionnalités existantes  
+- 🐛 **Corrigé** : Corrections de bugs
+- 🏗️ **Technique** : Changements techniques internes
+- 🚧 **En cours** : Fonctionnalités en développement
+- 📋 **Planifié** : Fonctionnalités prévues
