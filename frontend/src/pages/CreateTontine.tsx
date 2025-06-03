@@ -93,6 +93,7 @@ interface CreateTontineFormData {
 
 interface CreateTontineProps {
   onBack: () => void
+  onSuccess?: (newTontine: any) => void
 }
 
 const CreateTontine: React.FC<CreateTontineProps> = ({ onBack }) => {
@@ -100,7 +101,7 @@ const CreateTontine: React.FC<CreateTontineProps> = ({ onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<CreateTontineFormData>({
-    resolver: yupResolver(createTontineSchema),
+    resolver: yupResolver(createTontineSchema) as any,
     defaultValues: {
       name: '',
       description: '',
@@ -203,10 +204,11 @@ const CreateTontine: React.FC<CreateTontineProps> = ({ onBack }) => {
       // Redirection vers la page d'enrollment
       navigate(`/tontines/${newTontine.id}/enrollment`)
 
-    } catch (error) {
-      console.error('Erreur création tontine:', error)
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la création:', error)
+      setError('Une erreur est survenue lors de la création de la tontine')
       // Afficher une alerte avec le message d'erreur du backend
-      alert(`Erreur lors de la création de la tontine: ${error.message}`)
+            alert(`Erreur lors de la création de la tontine: ${error.message}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -243,7 +245,7 @@ const CreateTontine: React.FC<CreateTontineProps> = ({ onBack }) => {
           </p>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Colonne principale : Formulaire */}
             <div className="lg:col-span-2 space-y-8">
@@ -646,3 +648,7 @@ const CreateTontine: React.FC<CreateTontineProps> = ({ onBack }) => {
 }
 
 export default CreateTontine
+
+function setError(arg0: string) {
+  throw new Error('Function not implemented.')
+}

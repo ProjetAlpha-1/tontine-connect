@@ -1,3 +1,4 @@
+import { Settings } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
@@ -244,7 +245,7 @@ const TontineEnrollment: React.FC = () => {
   }
 
   const progressPercentage = (tontine.currentParticipants / tontine.minParticipants) * 100
-  const canProceed = tontine.currentParticipants >= tontine.minParticipants
+  const canProceed = true // TEMPORAIRE - forcer bouton
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -598,7 +599,7 @@ const TontineEnrollment: React.FC = () => {
                 >
                   {canProceed ? (
                     <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
+                      <Settings className="w-4 h-4 mr-2" />
                       Configurer l'ordre
                     </>
                   ) : (

@@ -16,8 +16,9 @@ export interface VerifyOTPResponse {
     name?: string
   }
   tokens: {
-    access_token: string
-    refresh_token?: string
+    accessToken: string      // ← Corrigé : accessToken au lieu de access_token
+    refreshToken?: string    // ← Corrigé : refreshToken au lieu de refresh_token
+    expiresIn?: number       // ← Ajouté
   }
 }
 
@@ -92,10 +93,25 @@ class AuthService {
       })
       
       console.log('✅ Réponse backend:', response.data)
+      console.log('🔍 Structure tokens:', response.data.tokens)
+      console.log('🔍 Access token:', response.data.tokens.accessToken)
+      console.log('🔍 Toutes les clés tokens:', Object.keys(response.data.tokens))
+      
+      // Récupérer le token (maintenant on connaît le bon nom)
+      const token = response.data.tokens.accessToken;
+
+      if (token) {
+        localStorage.setItem('tontine_token', token);
+        localStorage.setItem('tontine_user', JSON.stringify(response.data.user));
+        console.log('💾 Token sauvegardé:', token.substring(0, 20) + '...');
+      } else {
+        console.error('❌ Aucun token trouvé dans la réponse');
+        console.error('🔍 Réponse complète:', response.data);
+      }
       
       // ✅ Adapter la réponse de votre backend au format attendu par le frontend
       return {
-        token: response.data.tokens.access_token,
+        token: token || '',
         user: response.data.user
       }
     } catch (error: any) {

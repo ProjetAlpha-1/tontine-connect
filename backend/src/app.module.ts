@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TontinesModule } from './tontines/tontines.module';
+import { ConfigurationModule } from './configuration/configuration.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { TontinesModule } from './tontines/tontines.module';
     }),
     AuthModule,
     UsersModule,
-    TontinesModule, // Nouveau module ajouté
+    TontinesModule,
+    ConfigurationModule, // Nouveau module ajouté
   ],
   controllers: [AppController],
   providers: [AppService],

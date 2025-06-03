@@ -5,6 +5,7 @@ import { authService } from './services/authService'
 import Dashboard from './pages/Dashboard'
 import CreateTontine from './pages/CreateTontine'
 import TontineEnrollment from './pages/TontineEnrollment' 
+import TontineConfiguration from './pages/TontineConfiguration'
 
 
 // Composant wrapper pour l'authentification
@@ -115,6 +116,10 @@ const AuthenticatedApp: React.FC = () => {
           path="/tontines/:id/enrollment" 
           element={<TontineEnrollment />} 
         />
+                <Route 
+          path="/tontines/:id/configuration" 
+          element={<TontineConfiguration />} 
+          />
         {/* Redirection par défaut */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         {/* Route 404 */}
