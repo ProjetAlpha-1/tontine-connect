@@ -531,3 +531,136 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - 🏗️ **Technique** : Changements techniques internes
 - 🚧 **En cours** : Fonctionnalités en développement
 - 📋 **Planifié** : Fonctionnalités prévues
+
+
+# Changelog - Tontine Connect
+
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0] - 2025-06-03
+
+### 🎉 MAJEUR - Module Configuration Opérationnel
+
+#### ✅ Ajouté
+- **Module Configuration complet** avec 8 routes API fonctionnelles
+- **Authentification JWT end-to-end** pour toutes les routes Configuration
+- **Page Configuration frontend** avec workflow 3 étapes moderne
+- **4 types d'ordre de paiement** : Manuel, Aléatoire, Ancienneté, Réputation
+- **Système de règles personnalisables** (pénalités, délais de grâce, règles custom)
+- **Workflow d'accord des membres** avec validation
+- **Finalisation de configuration** et activation des tontines
+
+#### 🔧 Corrigé
+- **Authentification JWT** : Uniformisation des secrets entre génération et validation
+- **Configuration Module** : Import AuthModule pour accès aux guards JWT
+- **JWT Strategy** : Validation payload complète avec fallback secret cohérent
+- **API Intercepteur** : Envoi automatique du token JWT dans toutes les requêtes
+- **Guards JWT** : Protection effective des routes Configuration
+- **Types TypeScript** : Exports et imports Configuration corrigés
+
+#### 🚀 Amélioré
+- **Workflow complet** : Création → Enrollment → Configuration fonctionnel
+- **Debugging système** : Logs détaillés pour diagnostics authentification
+- **Architecture modulaire** : Patterns cohérents entre modules
+- **Interface Configuration** : Design moderne avec étapes et validation temps réel
+
+#### 📋 APIs Configuration
+```
+POST   /api/v1/tontines/:id/configuration           - Créer configuration
+GET    /api/v1/tontines/:id/configuration           - Récupérer configuration  
+PUT    /api/v1/tontines/:id/configuration/payment-order    - Modifier ordre
+PUT    /api/v1/tontines/:id/configuration/final-rules      - Modifier règles
+POST   /api/v1/tontines/:id/configuration/agreement        - Accord membre
+POST   /api/v1/tontines/:id/configuration/finalize         - Finaliser
+GET    /api/v1/tontines/:id/configuration/validate         - Valider état
+GET    /api/v1/tontines/:id/configuration/payment-order    - Détails ordre
+```
+
+#### 🎯 État du Projet
+- ✅ **Étape 1** : Création de tontines (TERMINÉE)
+- ✅ **Étape 2** : Enrollment et invitations (TERMINÉE) 
+- ✅ **Étape 3** : Configuration (TERMINÉE - v0.4.0)
+- 📋 **Étape 4** : Gestion active des cycles (PROCHAINE - v0.5.0)
+
+---
+
+## [0.3.0] - 2025-06-02
+
+### 🎯 Module Enrollment Complet
+
+#### ✅ Ajouté
+- **Module Enrollment backend** avec 7 routes API
+- **Page Enrollment frontend** avec interface moderne
+- **Système d'invitations SMS** avec tokens JWT
+- **Gestion des participants** (accepter/refuser/approuver)
+- **Invitations en lot** pour efficacité
+- **Statistiques enrollment** temps réel
+- **Navigation vers Configuration** automatique
+
+#### 🔧 Corrigé
+- **Validation téléphone** internationale (+241)
+- **Gestion états membres** (pending, approved, rejected)
+- **Interface responsive** pour tous écrans
+
+---
+
+## [0.2.0] - 2025-06-01
+
+### 🎯 Authentification et Création Tontines
+
+#### ✅ Ajouté
+- **Authentification OTP SMS** complète
+- **JWT tokens** avec refresh token
+- **Module Tontines** avec CRUD complet
+- **Page création tontines** avec validation
+- **Types TypeScript** pour toutes les entités
+- **Architecture modulaire** backend NestJS
+
+#### 🔧 Corrigé
+- **Stockage en mémoire** pour développement
+- **Validation formulaires** React Hook Form + Yup
+- **Interface utilisateur** moderne avec Tailwind CSS
+
+---
+
+## [0.1.0] - 2025-05-30
+
+### 🚀 Initialisation du Projet
+
+#### ✅ Ajouté
+- **Setup initial** : Backend NestJS + Frontend React
+- **Architecture monorepo** avec configuration TypeScript
+- **Authentification de base** par téléphone
+- **Design system** avec Tailwind CSS
+- **Configuration CI/CD** de base
+- **Documentation** README et structure projet
+
+#### 🎯 Fondations
+- Stack technique définie et opérationnelle
+- Architecture évolutive pour 4 étapes du workflow
+- Patterns de développement établis
+
+---
+
+## Prochaines Versions
+
+### [0.5.0] - Gestion Active (Prévu)
+- Dashboard tontine active avec métriques
+- Système de cycles automatisés  
+- Notifications et rappels paiements
+- Gestion retards et pénalités
+
+### [0.6.0] - Intégrations (Prévu)
+- Migration PostgreSQL avec Prisma
+- SMS réel (Twilio/service gabonais)
+- Mobile Money (Moov/Airtel Money)
+- Tests automatisés end-to-end
+
+### [1.0.0] - Production (Prévu)
+- Application complète déployée
+- Sécurité renforcée et audits
+- Performance optimisée
+- Documentation utilisateur complète
