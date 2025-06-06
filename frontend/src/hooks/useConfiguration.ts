@@ -65,27 +65,6 @@ export const useConfiguration = (tontineId: string, userId?: string): UseConfigu
   // État d'erreur
   const [error, setError] = useState<string | null>(null);
 
-  // Charger la configuration
-  const loadConfiguration = async () => {
-    if (!tontineId) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response: ConfigurationResponse = await configurationService.getConfiguration(tontineId);
-      setConfiguration(response.configuration);
-      setTontineInfo(response.tontineInfo);
-      
-      // Charger automatiquement la validation
-      await loadValidation();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors du chargement de la configuration');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Charger la validation
   const loadValidation = async () => {
     try {
@@ -94,6 +73,67 @@ export const useConfiguration = (tontineId: string, userId?: string): UseConfigu
     } catch (err) {
       // La validation peut échouer si la configuration n'existe pas encore
       setValidation(null);
+    }
+  };
+
+  // Charger la configuration AVEC AUTO-CRÉATION
+  const loadConfiguration = async () => {
+    if (!tontineId) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔄 Chargement configuration pour tontine:', tontineId);
+      
+      // 1. Essayer de récupérer la configuration existante
+      const response: ConfigurationResponse = await configurationService.getConfiguration(tontineId);
+      setConfiguration(response.configuration);
+      setTontineInfo(response.tontineInfo);
+      console.log('✅ Configuration chargée:', response);
+      
+      // Charger automatiquement la validation
+      await loadValidation();
+      
+    } catch (err: any) {
+      console.log('❌ Erreur lors du chargement:', err.response?.status);
+      
+      // 2. Si configuration n'existe pas (404), la créer automatiquement
+      if (err.response?.status === 404) {
+        console.log('🔧 Configuration inexistante, création automatique...');
+        
+        try {
+          // Configuration par défaut (structure correcte)
+          const defaultConfigData: CreateConfigurationFormData = {
+            paymentOrderType: 'random',
+            penaltyAmount: 5000,
+            gracePeriodDays: 3,
+            maxMissedPayments: 2,
+            interestRate: 0,
+            customRules: []
+          };
+          
+          console.log('📄 Création configuration par défaut:', defaultConfigData);
+          
+          // 3. Créer la configuration
+          const success = await createConfiguration(defaultConfigData);
+          if (success) {
+            console.log('✅ Configuration créée et chargée automatiquement');
+          } else {
+            console.error('❌ Échec de la création automatique');
+          }
+          
+        } catch (createError: any) {
+          console.error('❌ Erreur création configuration:', createError);
+          setError(createError.response?.data?.message || 'Erreur lors de la création de la configuration');
+        }
+      } else {
+        // Autre erreur (pas 404)
+        console.error('❌ Erreur API configuration:', err);
+        setError(err.response?.data?.message || 'Erreur lors du chargement de la configuration');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 

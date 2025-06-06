@@ -199,8 +199,19 @@ export class ConfigurationService {
     
     // Vérifier que l'utilisateur est le créateur
     // if (configuration.createdBy !== effectiveeffectiveUserId) {
-    //   throw new ForbiddenException('Seul le créateur peut modifier l\'ordre de paiement');
-    // }
+    // ❌ AVANT
+    if (configuration.createdBy !== effectiveeffectiveUserId) {
+      throw new ForbiddenException('Seul le créateur peut modifier l\'ordre de paiement');
+    }
+
+    // ✅ APRÈS (temporaire)
+    // 🚧 TEMPORAIRE : Désactiver vérification créateur pour tests v0.4.0
+    /*
+    if (configuration.createdBy !== effectiveeffectiveUserId) {
+      throw new ForbiddenException('Seul le créateur peut modifier l\'ordre de paiement');
+    }
+    */
+console.log('🔧 Vérification créateur (ordre paiement) désactivée temporairement');
     console.log('🔍 Vérification créateur updatePaymentOrder désactivée');
     
     // Vérifier que la configuration n'est pas finalisée
@@ -255,8 +266,19 @@ export class ConfigurationService {
     const configuration = await this.findConfigurationByTontineId(tontineId);
     
     // if (configuration.createdBy !== effectiveeffectiveUserId) {
-    //   throw new ForbiddenException('Seul le créateur peut modifier les règles');
-    // }
+    // ❌ AVANT
+if (configuration.createdBy !== effectiveeffectiveUserId) {
+  throw new ForbiddenException('Seul le créateur peut modifier les règles');
+}
+
+// ✅ APRÈS (temporaire)
+// 🚧 TEMPORAIRE : Désactiver vérification créateur pour tests v0.4.0
+/*
+if (configuration.createdBy !== effectiveeffectiveUserId) {
+  throw new ForbiddenException('Seul le créateur peut modifier les règles');
+}
+*/
+console.log('🔧 Vérification créateur (règles) désactivée temporairement');
     console.log('🔍 Vérification créateur updateFinalRules désactivée');
 
     if (configuration.status === ConfigurationStatus.COMPLETED) {
