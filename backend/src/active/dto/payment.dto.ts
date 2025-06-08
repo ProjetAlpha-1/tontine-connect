@@ -21,6 +21,79 @@ import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentMethod, PaymentStatus, MobileMoneyProvider } from '../types/active-types';
 
+// ✅ PaymentMethodDetailsDto DÉCLARÉE EN PREMIER
+export class PaymentMethodDetailsDto {
+  @ApiPropertyOptional({
+    description: 'Fournisseur Mobile Money',
+    enum: ['moov', 'airtel', 'other'],
+    example: 'moov'
+  })
+  @IsOptional()
+  @IsEnum(['moov', 'airtel', 'other'])
+  mobileMoneyProvider?: string;
+
+  @ApiPropertyOptional({
+    description: 'Numéro Mobile Money',
+    example: '+24107123456',
+    maxLength: 20
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  mobileMoneyNumber?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nom de la banque',
+    example: 'BGFI Bank',
+    maxLength: 100
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  bankName?: string;
+
+  @ApiPropertyOptional({
+    description: 'Numéro de compte bancaire',
+    example: '12345678901',
+    maxLength: 50
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  accountNumber?: string;
+
+  @ApiPropertyOptional({
+    description: 'Numéro de chèque',
+    example: '0012345',
+    maxLength: 20
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  checkNumber?: string;
+
+  @ApiPropertyOptional({
+    description: 'Banque émettrice du chèque',
+    example: 'UGB',
+    maxLength: 100
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  checkBank?: string;
+
+  @ApiPropertyOptional({
+    description: 'Informations supplémentaires',
+    example: 'Paiement effectué au bureau principal',
+    maxLength: 200
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  additionalInfo?: string;
+}
+
+// ✅ ConfirmPaymentDto UTILISE PaymentMethodDetailsDto (maintenant définie)
 export class ConfirmPaymentDto {
   @ApiProperty({
     description: 'ID du paiement à confirmer',
@@ -124,77 +197,6 @@ export class ConfirmPaymentDto {
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   generateReceipt?: boolean = true;
-}
-
-export class PaymentMethodDetailsDto {
-  @ApiPropertyOptional({
-    description: 'Fournisseur Mobile Money',
-    enum: ['moov', 'airtel', 'other'],
-    example: 'moov'
-  })
-  @IsOptional()
-  @IsEnum(['moov', 'airtel', 'other'])
-  mobileMoneyProvider?: string;
-
-  @ApiPropertyOptional({
-    description: 'Numéro Mobile Money',
-    example: '+24107123456',
-    maxLength: 20
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  mobileMoneyNumber?: string;
-
-  @ApiPropertyOptional({
-    description: 'Nom de la banque',
-    example: 'BGFI Bank',
-    maxLength: 100
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  bankName?: string;
-
-  @ApiPropertyOptional({
-    description: 'Numéro de compte bancaire',
-    example: '12345678901',
-    maxLength: 50
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  accountNumber?: string;
-
-  @ApiPropertyOptional({
-    description: 'Numéro de chèque',
-    example: '0012345',
-    maxLength: 20
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  checkNumber?: string;
-
-  @ApiPropertyOptional({
-    description: 'Banque émettrice du chèque',
-    example: 'UGB',
-    maxLength: 100
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  checkBank?: string;
-
-  @ApiPropertyOptional({
-    description: 'Informations supplémentaires',
-    example: 'Paiement effectué au bureau principal',
-    maxLength: 200
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  additionalInfo?: string;
 }
 
 export class CreatePaymentDto {

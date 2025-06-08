@@ -83,7 +83,7 @@ import {
  */
 
 @ApiTags('Réputation')
-@Controller('api/v1/reputation')
+@Controller('reputation')
 @ApiBearerAuth()
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}
@@ -229,14 +229,15 @@ export class ReputationController {
   })
   @ApiResponse({ status: 201, description: 'Événement créé avec succès' })
   @HttpCode(HttpStatus.CREATED)
-  async createReputationEvent(@Body() eventDto: CreateReputationEventDto) {
-    return this.reputationService.processReputationEvent(
-      eventDto.userId,
-      eventDto.eventType,
-      eventDto.eventData || {},
-      eventDto.tontineId
-    );
-  }
+  @Post('events')
+async createReputationEvent(@Body() eventDto: CreateReputationEventDto) {
+  return this.reputationService.processReputationEvent(
+    eventDto.userId,      // ✅ Correct ordre
+    eventDto.eventType,   // ✅ Correct ordre  
+    eventDto.eventData || {},
+    eventDto.tontineId
+  );
+}
 
   @Post('events/batch')
   @ApiOperation({ 

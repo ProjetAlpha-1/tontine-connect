@@ -35,6 +35,84 @@ import {
  */
 
 // =====================================
+// ✅ DÉCLARATION PRÉALABLE - ReputationWeightDto
+// =====================================
+
+export class ReputationWeightDto {
+  @ApiPropertyOptional({
+    description: 'Poids ponctualité paiements',
+    minimum: 0,
+    maximum: 1,
+    example: 0.35
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  paymentPunctuality?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids taux de participation',
+    minimum: 0,
+    maximum: 1,
+    example: 0.25
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  participationRate?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids taux de complétion',
+    minimum: 0,
+    maximum: 1,
+    example: 0.20
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  completionRate?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids contribution sociale',
+    minimum: 0,
+    maximum: 1,
+    example: 0.10
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  socialContribution?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids points d\'expérience',
+    minimum: 0,
+    maximum: 1,
+    example: 0.05
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  experiencePoints?: number;
+
+  @ApiPropertyOptional({
+    description: 'Impact des pénalités',
+    minimum: -1,
+    maximum: 0,
+    example: -0.05
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  @Max(0)
+  penaltyImpact?: number;
+}
+
+// =====================================
 // 📊 CRÉATION D'ÉVÉNEMENTS DE RÉPUTATION
 // =====================================
 
@@ -118,7 +196,7 @@ export class CreateReputationEventDto {
   @ApiPropertyOptional({
   description: 'Données supplémentaires de l\'événement',
   type: 'object',
-  additionalProperties: true,  // ← AJOUTER CETTE LIGNE
+  additionalProperties: true,
   example: { amount: 50000, currency: 'FCFA', method: 'mobile_money' }
 })
   @IsOptional()
@@ -493,7 +571,7 @@ export class BulkScoreAdjustmentDto {
   @ApiProperty({
   description: 'Critères de sélection des utilisateurs',
   type: 'object',
-  additionalProperties: true,  // ← AJOUTER CETTE LIGNE
+  additionalProperties: true,
   example: {
     level: 'intermediate',
     region: 'west_africa',
@@ -567,7 +645,7 @@ export class UpdateReputationConfigDto {
   @ApiPropertyOptional({
   description: 'Nouveaux poids pour le calcul de réputation',
   type: 'object',
-  additionalProperties: true  // ← AJOUTER CETTE LIGNE
+  additionalProperties: true
 })
   @IsOptional()
   @ValidateNested()
@@ -577,7 +655,7 @@ export class UpdateReputationConfigDto {
   @ApiPropertyOptional({
   description: 'Nouveaux seuils de niveaux',
   type: 'object',
-  additionalProperties: true,  // ← AJOUTER CETTE LIGNE
+  additionalProperties: true,
   example: { SILVER: 200, GOLD: 400, PLATINUM: 650, DIAMOND: 850 }
 })
   @IsOptional()
@@ -587,7 +665,7 @@ export class UpdateReputationConfigDto {
   @ApiPropertyOptional({
   description: 'Nouveaux impacts d\'événements',
   type: 'object',
-  additionalProperties: true,  // ← AJOUTER CETTE LIGNE
+  additionalProperties: true,
   example: { PAYMENT_ON_TIME: 12, PAYMENT_LATE: -18 }
 })
   @IsOptional()
@@ -628,80 +706,6 @@ export class UpdateReputationConfigDto {
   @IsOptional()
   @IsDateString()
   scheduledAt?: string;
-}
-
-export class ReputationWeightDto {
-  @ApiPropertyOptional({
-    description: 'Poids ponctualité paiements',
-    minimum: 0,
-    maximum: 1,
-    example: 0.35
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  paymentPunctuality?: number;
-
-  @ApiPropertyOptional({
-    description: 'Poids taux de participation',
-    minimum: 0,
-    maximum: 1,
-    example: 0.25
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  participationRate?: number;
-
-  @ApiPropertyOptional({
-    description: 'Poids taux de complétion',
-    minimum: 0,
-    maximum: 1,
-    example: 0.20
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  completionRate?: number;
-
-  @ApiPropertyOptional({
-    description: 'Poids contribution sociale',
-    minimum: 0,
-    maximum: 1,
-    example: 0.10
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  socialContribution?: number;
-
-  @ApiPropertyOptional({
-    description: 'Poids points d\'expérience',
-    minimum: 0,
-    maximum: 1,
-    example: 0.05
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  experiencePoints?: number;
-
-  @ApiPropertyOptional({
-    description: 'Impact des pénalités',
-    minimum: -1,
-    maximum: 0,
-    example: -0.05
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(-1)
-  @Max(0)
-  penaltyImpact?: number;
 }
 
 // =====================================
@@ -988,4 +992,4 @@ export class ReputationActionResponseDto {
     processingTime: number;
     affectedEntities: string[];
   };
-} 
+}
