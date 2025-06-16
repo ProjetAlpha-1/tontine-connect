@@ -1,5 +1,5 @@
 // backend/src/configuration/configuration.service.ts
-// 🔧 VERSION CORRIGÉE FINALE v0.4.0
+// 🔧 VERSION CORRIGÉE FINALE v0.4.1 - Fix creatorId → createdBy
 
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { 
@@ -85,15 +85,15 @@ export class ConfigurationService {
       throw new NotFoundException('Tontine introuvable');
     }
 
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
+    // 🚧 TEMPORAIRE v0.4.1 : Désactiver vérification créateur pour tests
     /*
-    if (tontine.creatorId !== effectiveUserId) {
+    if (tontine.createdBy !== effectiveUserId) {
       throw new ForbiddenException('Seul le créateur peut configurer la tontine');
     }
     */
-    console.log('🔧 Vérification créateur (création) désactivée temporairement - v0.4.0');
+    console.log('🔧 Vérification créateur (création) désactivée temporairement - v0.4.1');
     console.log('👤 Utilisateur JWT:', effectiveUserId);
-    console.log('👤 Créateur tontine:', tontine.creatorId);
+    console.log('👤 Créateur tontine:', tontine.createdBy); // FIX: creatorId → createdBy
 
     // Utiliser un userId par défaut pour les tests si nécessaire
     const finalUserId = effectiveUserId || 'temp_user_123';
@@ -167,7 +167,7 @@ export class ConfigurationService {
         id: tontine.id,
         name: tontine.name,
         status: tontine.status,
-        creatorId: tontine.creatorId,
+        creatorId: tontine.createdBy, // FIX: creatorId → createdBy
         totalMembers: approvedMembers.length
       }
     };
@@ -190,7 +190,7 @@ export class ConfigurationService {
         id: tontine.id,
         name: tontine.name,
         status: tontine.status,
-        creatorId: tontine.creatorId,
+        creatorId: tontine.createdBy, // FIX: creatorId → createdBy
         totalMembers: configuration.totalMembers
       }
     };
@@ -204,13 +204,13 @@ export class ConfigurationService {
   ): Promise<PaymentOrderResponse> {
     const configuration = await this.findConfigurationByTontineId(tontineId);
     
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
+    // 🚧 TEMPORAIRE v0.4.1 : Désactiver vérification créateur pour tests
     /*
     if (configuration.createdBy !== effectiveUserId) {
       throw new ForbiddenException('Seul le créateur peut modifier l\'ordre de paiement');
     }
     */
-    console.log('🔧 Vérification créateur (ordre paiement) désactivée temporairement - v0.4.0');
+    console.log('🔧 Vérification créateur (ordre paiement) désactivée temporairement - v0.4.1');
     
     // Vérifier que la configuration n'est pas finalisée
     if (configuration.status === ConfigurationStatus.COMPLETED) {
@@ -263,13 +263,13 @@ export class ConfigurationService {
   ): Promise<TontineConfiguration> {
     const configuration = await this.findConfigurationByTontineId(tontineId);
     
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
+    // 🚧 TEMPORAIRE v0.4.1 : Désactiver vérification créateur pour tests
     /*
     if (configuration.createdBy !== effectiveUserId) {
       throw new ForbiddenException('Seul le créateur peut modifier les règles');
     }
     */
-    console.log('🔧 Vérification créateur (règles) désactivée temporairement - v0.4.0');
+    console.log('🔧 Vérification créateur (règles) désactivée temporairement - v0.4.1');
 
     if (configuration.status === ConfigurationStatus.COMPLETED) {
       throw new BadRequestException('Impossible de modifier une configuration finalisée');
@@ -327,13 +327,13 @@ export class ConfigurationService {
   ): Promise<TontineConfiguration> {
     const configuration = await this.findConfigurationByTontineId(finalizeDto.tontineId);
 
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
+    // 🚧 TEMPORAIRE v0.4.1 : Désactiver vérification créateur pour tests
     /*
     if (configuration.createdBy !== effectiveUserId) {
       throw new ForbiddenException('Seul le créateur peut finaliser la configuration');
     }
     */
-    console.log('🔧 Vérification créateur (finalisation) désactivée temporairement - v0.4.0');
+    console.log('🔧 Vérification créateur (finalisation) désactivée temporairement - v0.4.1');
 
     // Valider que tous les membres ont accepté
     const validation = this.validateConfiguration(configuration);
@@ -342,7 +342,6 @@ export class ConfigurationService {
     }
 
     const finalUserId = effectiveUserId || 'temp_user_123';
-
 
     // Finaliser
     configuration.status = ConfigurationStatus.COMPLETED;

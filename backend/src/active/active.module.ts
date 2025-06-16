@@ -6,7 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { TontinesModule } from '../tontines/tontines.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
-import { EnrollmentModule } from '../enrollment/enrollment.module';
 import { ReputationModule } from '../reputation/reputation.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 
@@ -39,7 +38,6 @@ import { Notification } from './entities/notification.entity';
     AuthModule,
     forwardRef(() => TontinesModule),
     forwardRef(() => ConfigurationModule), 
-    forwardRef(() => EnrollmentModule),
     forwardRef(() => ReputationModule), // Pour l'intégration révolutionnaire
     forwardRef(() => NotificationsModule), // Pour les notifications
   ],

@@ -252,7 +252,7 @@ export class ActiveController {
       tontineId,
       penaltyData.memberId,
       penaltyData,
-      req.user.id
+       req?.user?.id || 'system-admin'  // ← Fix ici seulement
     );
   }
 

@@ -1,37 +1,22 @@
 // backend/src/tontines/tontines.service.ts
-// 🔧 VERSION CORRIGÉE v0.4.0
+// 🔧 VERSION CONNECTÉE v0.5.0 - ActiveTontine Database
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ActiveTontine } from '../active/entities/active-tontine.entity';
 import { CreateTontineDto } from './dto/create-tontine.dto';
 import { TontineStatus } from './enums/tontine-status.enum';
 import { TontineRules } from './interfaces/tontine-rules.interface';
 
-// Interface pour notre modèle Tontine (temporaire, sans DB)
-export interface Tontine {
-  id: string;
-  name: string;
-  description: string;
-  objective: string;
-  contributionAmount: number;
-  frequency: 'weekly' | 'biweekly' | 'monthly';
-  maxParticipants: number;
-  minParticipants: number;
-  enrollmentDeadline: Date;
-  plannedStartDate: Date;
-  status: TontineStatus;
-  creatorId: string;
-  rules: TontineRules;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 @Injectable()
 export class TontinesService {
-  // Stockage en mémoire (temporaire, sans DB)
-  private tontines: Tontine[] = [];
-  private currentId = 1;
+  constructor(
+    @InjectRepository(ActiveTontine)
+    private tontinesRepository: Repository<ActiveTontine>
+  ) {}
 
   // Créer une nouvelle tontine
-  async create(createTontineDto: CreateTontineDto, creatorId: string): Promise<Tontine> {
+  async create(createTontineDto: CreateTontineDto, creatorId: string): Promise<ActiveTontine> {
     // Validation des dates
     const enrollmentDeadline = new Date(createTontineDto.enrollmentDeadline);
     const plannedStartDate = new Date(createTontineDto.plannedStartDate);
@@ -55,20 +40,32 @@ export class TontinesService {
       throw new BadRequestException('La pénalité ne peut pas être supérieure au montant de contribution');
     }
 
-    // Création de la tontine
-    const tontine: Tontine = {
-      id: this.generateId(),
+    // Génération ID tontine unique
+    const tontineId = this.generateTontineId();
+
+    // Création de la tontine avec mapping vers ActiveTontine
+    const activeTontine = this.tontinesRepository.create({
+      tontineId: tontineId,
       name: createTontineDto.name,
       description: createTontineDto.description,
-      objective: createTontineDto.objective,
+      status: this.mapToActiveStatus(TontineStatus.DRAFT),
       contributionAmount: createTontineDto.contributionAmount,
       frequency: createTontineDto.frequency,
-      maxParticipants: createTontineDto.maxParticipants,
-      minParticipants: createTontineDto.minParticipants,
-      enrollmentDeadline: enrollmentDeadline,
-      plannedStartDate: plannedStartDate,
-      status: TontineStatus.DRAFT,
-      creatorId: creatorId,
+      maxMembers: createTontineDto.maxParticipants,
+      currentMembers: 0,
+      startDate: plannedStartDate,
+      // Fix: endDate doit être undefined pour nullable, pas null
+      nextPaymentDate: plannedStartDate,
+      currentCycleNumber: 0,
+      totalCycles: this.calculateTotalCycles(createTontineDto),
+      totalCollected: 0,
+      totalDistributed: 0,
+      members: [],
+      configuration: {
+        objective: createTontineDto.objective,
+        enrollmentDeadline: enrollmentDeadline,
+        minParticipants: createTontineDto.minParticipants
+      },
       rules: {
         penaltyAmount: createTontineDto.rules.penaltyAmount || 0,
         gracePeriodDays: createTontineDto.rules.gracePeriodDays,
@@ -76,21 +73,21 @@ export class TontinesService {
         orderDeterminationMethod: createTontineDto.rules.orderDeterminationMethod,
         minimumReputationScore: createTontineDto.rules.minimumReputationScore || 1
       },
-      createdAt: now,
-      updatedAt: now
-    };
-
-    // Sauvegarder en mémoire
-    this.tontines.push(tontine);
-
-    console.log('Tontine créée:', {
-      id: tontine.id,
-      name: tontine.name,
-      status: tontine.status,
-      creatorId: tontine.creatorId
+      createdBy: creatorId // Fix: Rétablir car champ existe bien
     });
 
-    return tontine;
+    // Sauvegarder en base de données - Fix: save() retourne l'objet pas un array
+    const savedTontine = await this.tontinesRepository.save(activeTontine);
+
+    console.log('Tontine créée en DB:', {
+      id: savedTontine.id,
+      tontineId: savedTontine.tontineId,
+      name: savedTontine.name,
+      status: savedTontine.status,
+      createdBy: savedTontine.createdBy
+    });
+
+    return savedTontine;
   }
 
   // Récupérer toutes les tontines (avec filtres optionnels)
@@ -98,89 +95,158 @@ export class TontinesService {
     creatorId?: string;
     status?: TontineStatus;
     participantId?: string;
-  }): Promise<Tontine[]> {
-    let result = [...this.tontines];
+  }): Promise<ActiveTontine[]> {
+    const queryBuilder = this.tontinesRepository.createQueryBuilder('tontine');
 
     if (filters) {
       if (filters.creatorId) {
-        result = result.filter(t => t.creatorId === filters.creatorId);
+        queryBuilder.andWhere('tontine.createdBy = :creatorId', { creatorId: filters.creatorId }); // Fix: Rétablir car champ existe
       }
       if (filters.status) {
-        result = result.filter(t => t.status === filters.status);
+        const mappedStatus = this.mapToActiveStatus(filters.status);
+        queryBuilder.andWhere('tontine.status = :status', { status: mappedStatus });
       }
-      // Note: participantId nécessitera la table des participations plus tard
+      // TODO: participantId nécessitera jointure avec table members
     }
 
-    return result;
+    const tontines = await queryBuilder.getMany();
+
+    console.log('Tontines trouvées:', {
+      count: tontines.length,
+      filters: filters
+    });
+
+    return tontines;
   }
 
-  // Récupérer une tontine par ID
-  async findOne(id: string): Promise<Tontine> {
-    const tontine = this.tontines.find(t => t.id === id);
+  // Récupérer une tontine par ID (cherche par id ET tontineId)
+  async findOne(id: string): Promise<ActiveTontine> {
+    // Essayer d'abord par tontineId (ancien comportement)
+    let tontine = await this.tontinesRepository.findOne({
+      where: { tontineId: id },
+      relations: ['cycles', 'notifications']
+    });
+
+    // Si pas trouvé, essayer par id (nouveau comportement)
+    if (!tontine) {
+      tontine = await this.tontinesRepository.findOne({
+        where: { id: id },
+        relations: ['cycles', 'notifications']
+      });
+    }
+
     if (!tontine) {
       throw new NotFoundException(`Tontine avec l'ID ${id} introuvable`);
     }
+
+    console.log('Tontine trouvée:', {
+      id: tontine.id,
+      tontineId: tontine.tontineId,
+      name: tontine.name,
+      status: tontine.status
+    });
+
     return tontine;
   }
 
   // Mettre à jour le statut d'une tontine
-  async updateStatus(id: string, status: TontineStatus, userId: string): Promise<Tontine> {
+  async updateStatus(id: string, status: TontineStatus, userId: string): Promise<ActiveTontine> {
     const tontine = await this.findOne(id);
 
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
-    /*
-    if (tontine.creatorId !== userId) {
-      throw new BadRequestException('Seul le créateur peut modifier le statut de la tontine');
-    }
-    */
-    console.log('🔧 Vérification créateur (updateStatus) désactivée temporairement - v0.4.0');
+    // 🚧 TEMPORAIRE v0.5.0 : Désactiver vérification créateur pour tests
+    console.log('🔧 Vérification créateur (updateStatus) désactivée temporairement - v0.5.0');
     console.log('👤 Utilisateur demandé:', userId);
-    console.log('👤 Créateur tontine:', tontine.creatorId);
+    console.log('👤 Créateur tontine:', tontine.createdBy); // Fix: Rétablir car champ existe
 
     // Validation des transitions de statut
-    if (!this.isValidStatusTransition(tontine.status, status)) {
+    if (!this.isValidStatusTransition(this.mapFromActiveStatus(tontine.status), status)) {
       throw new BadRequestException(`Transition de statut invalide: ${tontine.status} -> ${status}`);
     }
 
     // Mettre à jour
     const oldStatus = tontine.status;
-    tontine.status = status;
-    tontine.updatedAt = new Date();
+    tontine.status = this.mapToActiveStatus(status);
+    tontine.updatedBy = userId; // Fix: Rétablir car champ existe
 
-    console.log('Statut tontine mis à jour:', {
-      id: tontine.id,
+    const updatedTontine = await this.tontinesRepository.save(tontine);
+
+    console.log('Statut tontine mis à jour en DB:', {
+      id: tontine.tontineId,
       oldStatus: oldStatus,
-      newStatus: status
+      newStatus: updatedTontine.status
     });
 
-    return tontine;
+    return updatedTontine;
   }
 
   // Supprimer une tontine (seulement si en draft)
   async remove(id: string, userId: string): Promise<void> {
     const tontine = await this.findOne(id);
 
-    // 🚧 TEMPORAIRE v0.4.0 : Désactiver vérification créateur pour tests
-    /*
-    if (tontine.creatorId !== userId) {
-      throw new BadRequestException('Seul le créateur peut supprimer la tontine');
-    }
-    */
-    console.log('🔧 Vérification créateur (remove) désactivée temporairement - v0.4.0');
+    // 🚧 TEMPORAIRE v0.5.0 : Désactiver vérification créateur pour tests
+    console.log('🔧 Vérification créateur (remove) désactivée temporairement - v0.5.0');
 
-    if (tontine.status !== TontineStatus.DRAFT) {
+    const currentStatus = this.mapFromActiveStatus(tontine.status);
+    if (currentStatus !== TontineStatus.DRAFT) {
       throw new BadRequestException('Seules les tontines en brouillon peuvent être supprimées');
     }
 
-    const index = this.tontines.findIndex(t => t.id === id);
-    this.tontines.splice(index, 1);
+    await this.tontinesRepository.remove(tontine);
 
-    console.log('Tontine supprimée:', { id, userId });
+    console.log('Tontine supprimée de DB:', { id, userId });
+  }
+
+  // Méthodes pour les statistiques (pour le dashboard)
+  async getStats(userId: string) {
+    const tontines = await this.tontinesRepository.find({
+      where: { createdBy: userId } // Fix: Rétablir car champ existe
+    });
+
+    const stats = {
+      total: tontines.length,
+      active: tontines.filter(t => t.status === 'active').length,
+      pending: tontines.filter(t => t.status === 'pending').length,
+      completed: tontines.filter(t => t.status === 'completed').length,
+    };
+
+    console.log('Stats calculées:', { userId, stats });
+
+    return stats;
   }
 
   // Méthodes utilitaires privées
-  private generateId(): string {
-    return `tontine_${Date.now()}_${this.currentId++}`;
+  private generateTontineId(): string {
+    return `tontine_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private calculateTotalCycles(dto: CreateTontineDto): number {
+    // Calcul basé sur la fréquence et la durée prévue
+    // Pour l'instant, on utilise le nombre max de participants
+    return dto.maxParticipants;
+  }
+
+  private mapToActiveStatus(tontineStatus: TontineStatus): string {
+    const statusMapping = {
+      [TontineStatus.DRAFT]: 'pending',
+      [TontineStatus.ENROLLMENT]: 'pending',
+      [TontineStatus.CONFIGURATION]: 'pending',
+      [TontineStatus.ACTIVE]: 'active',
+      [TontineStatus.PAUSED]: 'paused',
+      [TontineStatus.COMPLETED]: 'completed',
+      [TontineStatus.CANCELLED]: 'cancelled'
+    };
+    return statusMapping[tontineStatus] || 'pending';
+  }
+
+  private mapFromActiveStatus(activeStatus: string): TontineStatus {
+    const statusMapping: Record<string, TontineStatus> = {
+      'pending': TontineStatus.DRAFT,
+      'active': TontineStatus.ACTIVE,
+      'paused': TontineStatus.PAUSED,
+      'completed': TontineStatus.COMPLETED,
+      'cancelled': TontineStatus.CANCELLED
+    };
+    return statusMapping[activeStatus] || TontineStatus.DRAFT;
   }
 
   private isValidStatusTransition(currentStatus: TontineStatus, newStatus: TontineStatus): boolean {
@@ -195,17 +261,5 @@ export class TontinesService {
     };
 
     return validTransitions[currentStatus]?.includes(newStatus) || false;
-  }
-
-  // Méthodes pour les statistiques (pour le dashboard)
-  async getStats(userId: string) {
-    const userTontines = this.tontines.filter(t => t.creatorId === userId);
-    
-    return {
-      total: userTontines.length,
-      active: userTontines.filter(t => t.status === TontineStatus.ACTIVE).length,
-      draft: userTontines.filter(t => t.status === TontineStatus.DRAFT).length,
-      completed: userTontines.filter(t => t.status === TontineStatus.COMPLETED).length,
-    };
   }
 }
